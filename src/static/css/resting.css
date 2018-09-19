@@ -1,0 +1,71 @@
+#empty-container {
+  margin: auto;
+  height: 500px;
+  display: flex;
+  align-items: center;
+}
+
+#fixation-dot {
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  background-color: white;
+  margin: auto;
+}
+
+#stimulus-container {
+  width: 100%;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.photodiode-box {
+  /* width: 150px;
+  height: 150px;
+  background-color: black; */
+  position: fixed;
+  bottom: 3px;
+  right: 3px;
+  display: flex;
+}
+
+.photodiode-spot {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin: auto;
+  outline: 3px solid rgb(80,80,80);
+  /* position: absolute; */
+}
+.photodiode-spot.lit {
+  background-color: white;
+}
+.photodiode-spot.unlit {
+  background-color: black;
+}
+
+.jspsych-content-wrapper {
+  display: flex;
+  /*justify-content: center;
+  align-items: center;*/
+  margin: auto; /* this does the same thing as above two lines in this case */
+  flex: 1 1 100%;
+  width: 100%;
+
+  /* NEW STUFF 2018, NOT VANILLA JSPSYCH */
+  background-color: black;
+  cursor: none;
+}
+#patient-id-please, #jspsych-html-keyboard-response-stimulus, #jspsych-html-button-response-stimulus, p {
+  color: white;
+}
+
+.instructions-text {
+  color: white;
+  width: 500px;
+}
+
+::-webkit-scrollbar { 
+  display: none; 
+}
