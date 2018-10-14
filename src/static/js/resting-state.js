@@ -8,9 +8,23 @@ let patient_ID = 'TEST_ID'
 const task_name = 'RESTING-STATE'
 const dateObj = new Date()
 const date_today = [dateObj.getFullYear(), (dateObj.getMonth()+1), dateObj.getDate()].join('-')
-const date_timestamp = [dateObj.getHours(), dateObj.getMinutes(), dateObj.getSeconds()].join('-')
+// const date_timestamp = [dateObj.getHours(), dateObj.getMinutes(), dateObj.getSeconds()].join('-')
 const alldata_folder_name = 'OCD-Project-Data'
 const path_to_alldata = nodejs_path.join(app.getPath('home'), alldata_folder_name)
+
+function dateString(date_obj) {
+  return [date_obj.getFullYear(), (date_obj.getMonth()+1), date_obj.getDate()].join('-');
+}
+
+function timeString(date_obj) {
+  return [date_obj.getHours(), date_obj.getMinutes(), date_obj.getSeconds()].join('-');
+}
+
+function dateTimeString(date_obj) {
+  return [dateString(date_obj), timeString(date_obj)].join('_')
+}
+
+// function zeroPad(d)
 
 // Values to send to the 'USB event marker' arduino when an event happens.
 // Make sure the 'open_resting_task' value doesn't conflict with any value sent
