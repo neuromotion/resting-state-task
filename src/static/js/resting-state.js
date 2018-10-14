@@ -14,7 +14,50 @@ let path_to_save = ''
 const alldata_folder_name = 'OCD-Project-Data'
 const path_to_alldata = nodejs_path.join(app.getPath('home'), alldata_folder_name)
 
+// Values to send to the 'USB event marker' arduino when an event happens.
+// Make sure the 'open_resting_task' value doesn't conflict with any value sent
+// by any other task, since we use it to uniquely identify this task. It's ok
+// for other values to be re-used in other tasks.
+const event_codes = {
+  'open_resting_task': 12,
+  'start_rest': 1,
+  'end_rest': 2,
+}
 
+// Open a serial port to the "USB event marker".
+// Return a fs.WriteStream to the port, or null if something failed.
+function openEventMarkerPort() {
+  try {
+    // Use a python script to find which serial port the USB event marker is attached to, if any.
+    const execFileSync = require('child_process').execFileSync;
+    const out = execFileSync(
+      "/home/evan/USB-event-marker/find_event_marker_port.py",
+      [],
+      {encoding: 'utf-8'}
+    )
+    const port_path = out.trim();
+    // Open the port and return a WriteStream to it.
+    return fs.createWriteStream(port_path);
+  }
+  catch (e) {
+    // Failed - maybe the script isn't installed, or the event marker isn't plugged in.
+    console.log("Failed to open event marker port")
+    console.log(e)
+    return null
+  }
+}
+
+const event_marker_port = openEventMarkerPort();
+
+// Send the event code to the "USB event marker" arduino, over a serial port. Event code should be a number in range [1,31].
+function sendUsbEvent(event_code) {
+  if (event_marker_port === null) {
+    console.log("Tried to send event, but event marker port wasn't opened")
+  }
+  else {
+    event_marker_port.write(Buffer.from([event_code]));
+  }
+}
 
 let enter_patient_info = {
   type: 'survey-text',
@@ -69,8 +112,14 @@ const resting_pulse_encode = {
   'trial_duration': 2000,
   'stimulus': '<h1>Setting up task, please wait...</h1>' + photodiode_box(false),
   'on_load': function() {
-    setTimeout(() => PD_spot_encode(12), 400)
+    setTimeout(markStartOfTask, 400)
   }
+}
+
+function markStartOfTask() {
+  const code = event_codes.open_resting_task;
+  PD_spot_encode(code);
+  sendUsbEvent(code);
 }
 
 const fullscreen_shortcut = (process.platform === 'darwin') ? 'Command+Control+F' : 'Fn+F11' //else, linux
@@ -100,6 +149,7 @@ const resting_task = {
   'response-ends-trial': false,
   'trial_duration': (60*3 * 1000),
   'on_load': function() {
+    sendUsbEvent(event_codes.start_rest);
     // console.log('loaded')
     const path_array = [path_to_alldata, patient_ID, 'metadata', date_today]
     path_to_save = nodejs_path.join(path_to_alldata, patient_ID, 'metadata', date_today)
@@ -147,6 +197,7 @@ const resting_task = {
     }
   },
   'on_finish': function(data) {
+    sendUsbEvent(event_codes.end_rest);
     const new_metadata = {
       'task': task_name,
       'start_end': 'end',
