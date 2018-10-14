@@ -15,10 +15,6 @@ const alldata_folder_name = 'OCD-Project-Data'
 const path_to_alldata = nodejs_path.join(app.getPath('home'), alldata_folder_name)
 
 
-const photodiode_ghost_box = 
-  "<div class='photodiode-box' id='photodiode-box'>" +
-    "<span class='photodiode-spot unlit' id='photodiode-spot'></span>" +
-  "</div>"
 
 let enter_patient_info = {
   type: 'survey-text',
@@ -60,15 +56,18 @@ function PD_spot_encode(num_code) {
   repeat_pulse_for(spot, 40, num_code)
 }
 
+function photodiode_box(is_lit) {
+  const style = is_lit ? 'lit' : 'unlit';
+  return "<div class='photodiode-box' id='photodiode-box'>" +
+    `<span class='photodiode-spot ${style}' id='photodiode-spot'></span>` +
+    "</div>";
+}
+
 const resting_pulse_encode = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
   'trial_duration': 2000,
-  'stimulus': 
-    '<h1>Setting up task, please wait...</h1>' +
-    "<div class='photodiode-box' id='photodiode-box'>" +
-      "<span class='photodiode-spot unlit' id='photodiode-spot'></span>" +
-    "</div>",
+  'stimulus': '<h1>Setting up task, please wait...</h1>' + photodiode_box(false),
   'on_load': function() {
     setTimeout(() => PD_spot_encode(12), 400)
   }
@@ -79,7 +78,7 @@ const zoomin_shortcut = (process.platform === 'darwin') ? 'Command+=' : 'Control
 const zoomout_shortcut = (process.platform === 'darwin') ? 'Command+-' : 'Control+-' //else, linux
 var new_experiment_screen = {
   type: 'html-button-response',
-  stimulus: '<span id="task-name"><h1>Resting State Task</h1></span>' + photodiode_ghost_box,
+  stimulus: '<span id="task-name"><h1>Resting State Task</h1></span>' + photodiode_box(false),
   choices: ['Continue'],
   // prompt: ['<h3 style="color:white;">Press "' + fullscreen_shortcut + '" to toggle Fullscreen.</h3>'].join(''),
   on_load: () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'default')
@@ -97,11 +96,7 @@ const instructions = {
 const resting_task = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
-  'stimulus':
-    '<div id="fixation-dot">hi</div>' +
-    '<div class="photodiode-box" id="photodiode-box">' +
-      '<span class="photodiode-spot lit" id="photodiode-spot"></span>' +
-    '</div>',
+  'stimulus': '<div id="fixation-dot">hi</div>' + photodiode_box(true),
   'response-ends-trial': false,
   'trial_duration': (60*3 * 1000),
   'on_load': function() {
