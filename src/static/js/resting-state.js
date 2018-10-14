@@ -4,13 +4,11 @@ const app = remote.app
 const nodejs_path = require('path');
 const fs = require('fs')
 
-let patient_ID = ''
+let patient_ID = 'TEST_ID'
 const task_name = 'RESTING-STATE'
 const dateObj = new Date()
 const date_today = [dateObj.getFullYear(), (dateObj.getMonth()+1), dateObj.getDate()].join('-')
 const date_timestamp = [dateObj.getHours(), dateObj.getMinutes(), dateObj.getSeconds()].join('-')
-let filename = ''
-let path_to_save = ''
 const alldata_folder_name = 'OCD-Project-Data'
 const path_to_alldata = nodejs_path.join(app.getPath('home'), alldata_folder_name)
 
@@ -65,15 +63,8 @@ let enter_patient_info = {
   on_load: () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'default'),
   on_finish: function(data) {
     const answer = JSON.parse(data.responses)['Q0']
-    patient_ID = (answer === '') ? 'TEST_ID' : answer
+    patient_ID = (answer === '') ? patient_ID : answer
   }
-}
-
-function saveToFile(data, path_to_file) {
-  fs.writeFile(path_to_file, data, (err) => {
-    if (err) throw err;
-    console.log('Data saved to ' + path_to_file)
-  })
 }
 
 function PD_spot_encode(num_code) {
@@ -125,6 +116,7 @@ function markStartOfTask() {
 const fullscreen_shortcut = (process.platform === 'darwin') ? 'Command+Control+F' : 'Fn+F11' //else, linux
 const zoomin_shortcut = (process.platform === 'darwin') ? 'Command+=' : 'Control+Shift+=' //else, linux
 const zoomout_shortcut = (process.platform === 'darwin') ? 'Command+-' : 'Control+-' //else, linux
+
 var new_experiment_screen = {
   type: 'html-button-response',
   stimulus: '<span id="task-name"><h1>Resting State Task</h1></span>' + photodiode_box(false),
@@ -142,76 +134,84 @@ const instructions = {
   'on_load': () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'none')
 }
 
+
+function minutes_to_millis(num_minutes) {
+  return num_minutes * 60 * 1000;
+}
+
+function overwriteFile(data, path_to_file) {
+  fs.writeFile(path_to_file, data, (err) => {
+    if (err) throw err;
+    console.log('Data saved to ' + path_to_file)
+  })
+}
+
+function getLogPath() {
+  const folder = nodejs_path.join(path_to_alldata, patient_ID, 'metadata', date_today);
+  const filename = ['METADATA', patient_ID, date_today].join('_') + '.JSON';
+  return nodejs_path.join(folder, filename);
+}
+
+function mkdirRecursive(new_path) {
+  // Make any directories on the given path that don't exist yet.
+  nodejs_path.dirname(new_path)
+    .split(nodejs_path.sep)
+    .reduce((currentPath, folder) => {
+      currentPath += folder + nodejs_path.sep;
+      if (!fs.existsSync(currentPath)){
+        fs.mkdirSync(currentPath);
+      }
+      return currentPath;
+    }, '');
+}
+
+function appendToListInFile(object, path) {
+  const object_json = JSON.stringify(object);
+  if (fs.existsSync(path)) {
+    // Remove the last character of the file (assuming it was a ']'),
+    // then append the new object and replace the `]`.
+    fs.readFile(path, 'utf-8', function(err, fs_data) {
+      if (err) throw err;
+      let newStream = fs_data.slice(0, -1)
+      newStream += ','
+      newStream += object_json + ']'
+      overwriteFile(newStream, path)
+    })
+  }
+  else {
+    // Create the new file and any directories along the path that don't exist yet.
+    // Put the object as the sole element of a list.
+    mkdirRecursive(path);
+    const newStream = '[' + object_json + ']';
+    overwriteFile(newStream, path);
+  }
+}
+
+function newMetadata(start_or_end) {
+  // start_or_end should be either the string 'start' or 'end'.
+  return {
+    'task': task_name,
+    'start_end': start_or_end,
+    'timestamp': Date.now(),
+    'patient_ID': patient_ID,
+    'metadata': []
+  };
+}
+
 const resting_task = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
   'stimulus': '<div id="fixation-dot">hi</div>' + photodiode_box(true),
   'response-ends-trial': false,
-  'trial_duration': (60*3 * 1000),
+  'trial_duration': minutes_to_millis(3),
   'on_load': function() {
     sendUsbEvent(event_codes.start_rest);
-    // console.log('loaded')
-    const path_array = [path_to_alldata, patient_ID, 'metadata', date_today]
-    path_to_save = nodejs_path.join(path_to_alldata, patient_ID, 'metadata', date_today)
-    filename = ['METADATA', patient_ID, date_today].join('_') + '.JSON'
-
-    function initializePath(path, callback) {
-      if (path.length === 0) { throw new Error('Ran out of path!')}
-      else {
-        const tryFolder = path.pop()
-        const tryPath = path.join('/')
-
-        if (fs.existsSync(tryPath)) {
-          fs.mkdir(nodejs_path.join(tryPath, tryFolder), callback)
-        }
-        else {
-          initializePath(path, function() {
-            fs.mkdir(nodejs_path.join(tryPath, tryFolder), callback)
-          })
-        }
-      }
-    }
-
-    const new_metadata = {
-      'task': task_name,
-      'start_end': 'start',
-      'timestamp': Date.now(),
-      'patient_ID': patient_ID,
-      'metadata': []
-    }
-
-    if (fs.existsSync(nodejs_path.join(path_to_save, filename))) {
-      fs.readFile(nodejs_path.join(path_to_save, filename), 'utf-8', function(err, fs_data) {
-        if (err) throw err;
-        let newStream = fs_data.slice(0, -1)
-        newStream += ','
-        newStream += JSON.stringify(new_metadata) + ']'
-        saveToFile(newStream, nodejs_path.join(path_to_save, filename))
-      })
-    }
-    else {
-      const newStream = '[' + JSON.stringify(new_metadata) + ']'
-      initializePath(path_array, function() {
-        saveToFile(newStream, nodejs_path.join(path_to_save, filename))
-      })
-    }
+    appendToListInFile(newMetadata('start'), getLogPath());
   },
+
   'on_finish': function(data) {
     sendUsbEvent(event_codes.end_rest);
-    const new_metadata = {
-      'task': task_name,
-      'start_end': 'end',
-      'timestamp': Date.now(),
-      'patient_ID': patient_ID,
-      'metadata': []
-    }
-    fs.readFile(nodejs_path.join(path_to_save, filename), 'utf-8', function(err, fs_data) {
-      if (err) throw err;
-      let newStream = fs_data.slice(0, -1)
-      newStream += ','
-      newStream += JSON.stringify(new_metadata) + ']'
-      saveToFile(newStream, nodejs_path.join(path_to_save, filename))
-    })
+    appendToListInFile(newMetadata('end'), getLogPath());
   }
 }
 
