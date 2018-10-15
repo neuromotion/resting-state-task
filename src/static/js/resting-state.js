@@ -7,6 +7,9 @@ const fs = require('fs')
 const task_name = 'resting-state';
 const path_to_alldata = nodejs_path.join(app.getPath('desktop'), 'OCD-Project-Data');
 
+// How long to gather resting-state data for:
+const task_minutes = 3;
+
 // Values to send to the 'USB event marker' arduino when an event happens.
 // Make sure the 'open_resting_task' value doesn't conflict with any value sent
 // by any other task, since we use it to uniquely identify this task. It's ok
@@ -22,6 +25,7 @@ const time_opened = new Date();
 
 // Should be overwritten by user input
 let patient_ID = 'TEST_ID'
+
 
 // Attempt to open the USB Event Marker serial port now.
 const event_marker_port = openEventMarkerPort();
@@ -66,7 +70,12 @@ let enter_patient_info = {
 const instructions = {
   'type': 'instructions',
   'pages': [
-    '<h3 class="instructions-text">Please sit quietly for the next three minutes.</h3><h3 class="instructions-text">Try to fixate on the dot on the screen</h3><h3 class="instructions-text">Keep your eyes open and try not to move around too much</h3><h3 class="instructions-text">Press the Space key to begin</h3>'
+    '<h3 class="instructions-text">' +
+      'Please sit quietly for the next ' + minutes_to_string(task_minutes) + '.' +
+      '</h3>' +
+      '<h3 class="instructions-text">Try to fixate on the dot on the screen</h3>' +
+      '<h3 class="instructions-text">Keep your eyes open and try not to move around too much</h3>' +
+      '<h3 class="instructions-text">Press the Space key to begin</h3>'
   ],
   'key_forward': ' ',
   'on_load': () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'none')
@@ -77,7 +86,7 @@ const resting_task = {
   'choices': jsPsych.NO_KEYS,
   'stimulus': '<div id="fixation-dot">hi</div>' + photodiode_box(true),
   'response-ends-trial': false,
-  'trial_duration': minutes_to_millis(3),
+  'trial_duration': minutes_to_millis(task_minutes),
   'on_load': function() {
     sendUsbEvent(event_codes.start_rest);
     appendToListInFile(newMetadata('start'), getLogPath(time_opened));
@@ -113,6 +122,14 @@ function minutes_to_millis(num_minutes) {
   return num_minutes * 60 * 1000;
 }
 
+function minutes_to_string(num_minutes) {
+  let string = num_minutes + ' minute';
+  if (num_minutes != 1) {
+    string = string + 's'
+  }
+  return string;
+}
+
 /************ Logging Utilities **************/
 
 function getLogPath(date_obj) {
@@ -144,8 +161,7 @@ function timeString(date_obj) {
 }
 
 function zeroPadTwoDigits(number) {
-  // Convert the 1 or 2-digit number to a string. If it has only 1 digit, pad
-  // with a zero on the left.
+  // Convert the 1 or 2-digit number to a string. If it has only 1 digit, pad with a zero on the left.
   return ('0' + number).slice(-2);
 }
 
