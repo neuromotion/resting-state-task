@@ -4,13 +4,14 @@ const app = remote.app
 const nodejs_path = require('path');
 const fs = require('fs')
 
-const task_name = 'RESTING-STATE'
-const path_to_alldata = nodejs_path.join(app.getPath('home'), 'OCD-Project-Data');
-const today = new Date();
+const task_name = 'resting-state';
+const path_to_alldata = nodejs_path.join(app.getPath('desktop'), 'OCD-Project-Data');
 
-// Should be overwritten by user input:
+// Use the current time and date for naming the log file
+const time_opened = new Date();
+
+// Should be overwritten by user input
 let patient_ID = 'TEST_ID'
-
 
 // Values to send to the 'USB event marker' arduino when an event happens.
 // Make sure the 'open_resting_task' value doesn't conflict with any value sent
@@ -171,9 +172,10 @@ function zeroPadTwoDigits(number) {
 
 function getLogPath(date_obj) {
   // Pick the path to the log file (including directories and file that might not exist yet).
-  const date_string = dateString(date_obj);
-  const folder = nodejs_path.join(path_to_alldata, patient_ID, 'metadata', date_string);
-  const filename = ['METADATA', patient_ID, date_string].join('_') + '.JSON';
+  const date = dateString(date_obj);
+  const date_time = dateTimeString(date_obj);
+  const filename = [patient_ID, task_name, date_time].join('_') + '.JSON';
+  const folder = nodejs_path.join(path_to_alldata, patient_ID, date, task_name);
   return nodejs_path.join(folder, filename);
 }
 
@@ -231,12 +233,12 @@ const resting_task = {
   'trial_duration': minutes_to_millis(3),
   'on_load': function() {
     sendUsbEvent(event_codes.start_rest);
-    appendToListInFile(newMetadata('start'), getLogPath(today));
+    appendToListInFile(newMetadata('start'), getLogPath(time_opened));
   },
 
   'on_finish': function(data) {
     sendUsbEvent(event_codes.end_rest);
-    appendToListInFile(newMetadata('end'), getLogPath(today));
+    appendToListInFile(newMetadata('end'), getLogPath(time_opened));
   }
 }
 
