@@ -195,14 +195,16 @@ function mkdirRecursive(new_path) {
 function appendToListInFile(object, path) {
   const object_json = JSON.stringify(object);
   if (fs.existsSync(path)) {
-    // Remove the last character of the file (assuming it was a ']'),
-    // then append the new object and replace the `]`.
+    // Modify the existing file.
     fs.readFile(path, 'utf-8', function(err, fs_data) {
       if (err) throw err;
-      let newStream = fs_data.slice(0, -1)
-      newStream += ','
-      newStream += object_json + ']'
-      overwriteFile(newStream, path)
+      // Trim whitespace (like a trailing newline), then remove the last
+      // character of the file, which we assume was a `]`.
+      let newStream = fs_data.trim().slice(0, -1);
+      // Append the new object and close the array again with a `]`.
+      newStream += ',';
+      newStream += object_json + ']';
+      overwriteFile(newStream, path);
     })
   }
   else {
