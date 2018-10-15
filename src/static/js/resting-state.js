@@ -4,27 +4,13 @@ const app = remote.app
 const nodejs_path = require('path');
 const fs = require('fs')
 
-let patient_ID = 'TEST_ID'
 const task_name = 'RESTING-STATE'
-const dateObj = new Date()
-const date_today = [dateObj.getFullYear(), (dateObj.getMonth()+1), dateObj.getDate()].join('-')
-// const date_timestamp = [dateObj.getHours(), dateObj.getMinutes(), dateObj.getSeconds()].join('-')
-const alldata_folder_name = 'OCD-Project-Data'
-const path_to_alldata = nodejs_path.join(app.getPath('home'), alldata_folder_name)
+const path_to_alldata = nodejs_path.join(app.getPath('home'), 'OCD-Project-Data');
+const today = new Date();
 
-function dateString(date_obj) {
-  return [date_obj.getFullYear(), (date_obj.getMonth()+1), date_obj.getDate()].join('-');
-}
+// Should be overwritten by user input:
+let patient_ID = 'TEST_ID'
 
-function timeString(date_obj) {
-  return [date_obj.getHours(), date_obj.getMinutes(), date_obj.getSeconds()].join('-');
-}
-
-function dateTimeString(date_obj) {
-  return [dateString(date_obj), timeString(date_obj)].join('_')
-}
-
-// function zeroPad(d)
 
 // Values to send to the 'USB event marker' arduino when an event happens.
 // Make sure the 'open_resting_task' value doesn't conflict with any value sent
@@ -160,9 +146,34 @@ function overwriteFile(data, path_to_file) {
   })
 }
 
-function getLogPath() {
-  const folder = nodejs_path.join(path_to_alldata, patient_ID, 'metadata', date_today);
-  const filename = ['METADATA', patient_ID, date_today].join('_') + '.JSON';
+function dateString(date_obj) {
+  return [
+    date_obj.getFullYear(),
+    zeroPadTwoDigits(date_obj.getMonth()+1),
+    zeroPadTwoDigits(date_obj.getDate())
+  ].join('-');
+}
+
+function timeString(date_obj) {
+  return [
+    date_obj.getHours(), date_obj.getMinutes(), date_obj.getSeconds()
+  ].map(zeroPadTwoDigits).join('-');
+}
+
+function dateTimeString(date_obj) {
+  return [dateString(date_obj), timeString(date_obj)].join('_');
+}
+
+function zeroPadTwoDigits(number) {
+  // Convert the 1 or 2-digit number to a string. If it has only 1 digit, pad with a zero on the left.
+  return ('0' + number).slice(-2);
+}
+
+function getLogPath(date_obj) {
+  // Pick the path to the log file (including directories and file that might not exist yet).
+  const date_string = dateString(date_obj);
+  const folder = nodejs_path.join(path_to_alldata, patient_ID, 'metadata', date_string);
+  const filename = ['METADATA', patient_ID, date_string].join('_') + '.JSON';
   return nodejs_path.join(folder, filename);
 }
 
@@ -220,12 +231,12 @@ const resting_task = {
   'trial_duration': minutes_to_millis(3),
   'on_load': function() {
     sendUsbEvent(event_codes.start_rest);
-    appendToListInFile(newMetadata('start'), getLogPath());
+    appendToListInFile(newMetadata('start'), getLogPath(today));
   },
 
   'on_finish': function(data) {
     sendUsbEvent(event_codes.end_rest);
-    appendToListInFile(newMetadata('end'), getLogPath());
+    appendToListInFile(newMetadata('end'), getLogPath(today));
   }
 }
 
@@ -249,12 +260,5 @@ function begin() {
 }
 
 window.onload = function() {
-  if (fs.existsSync(path_to_alldata)) {
-    begin()
-  }
-  else {
-    fs.mkdir(path_to_alldata, function() {
-      begin()
-    })
-  }
+  begin()
 }
