@@ -31,14 +31,44 @@ let patient_ID = 'TEST_ID'
 const event_marker_port = openEventMarkerPort();
 
 
+const fullscreen_shortcut = (process.platform === 'darwin') ? 'Command Control F' : 'Fn F11' //else, linux
+const zoomin_shortcut = (process.platform === 'darwin') ? 'Command =' : 'Control Shift =' //else, linux
+const zoomout_shortcut = (process.platform === 'darwin') ? 'Command -' : 'Control -' //else, linux
+
 /********** Timeline Components **********/
 
 var new_experiment_screen = {
   type: 'html-button-response',
   stimulus: '<span id="task-name"><h1>Resting State Task</h1></span>' + photodiode_box(false),
   choices: ['Continue'],
+  prompt: '<h3 style="color:white;">Press "' + fullscreen_shortcut + '" to toggle Fullscreen.</h3>',
   on_load: () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'default')
 }
+
+const adjust_zoom = {
+  'type': 'html-keyboard-response',
+  'choices': [' '],
+  'stimulus': [
+    '<div id="stimulus-container">',
+    '<div id="empty-container">',
+    '<div>',
+    '<h1>Zoom in to enlarge screen</h1>',
+    '<h3>Make sure that the number 0 remains completely visible.</h3>',
+    '<hr>',
+    '<div style="display:flex; flex-direction:column; justify-content:center;">',
+    '<span>To zoom in, press "' + zoomin_shortcut + '".</span>',
+    '<span>To zoom out, press "' + zoomout_shortcut + '".</span>',
+    '<span>Press the Space key to continue.</span>',
+    '</div>',
+    '</div>',
+    '</div>',
+    '</div>',
+    '<div>0</div></div>',
+    photodiode_box(false)
+  ].join(''),
+  on_load: () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'default')
+}
+
 
 const resting_pulse_encode = {
   'type': 'html-keyboard-response',
@@ -140,7 +170,6 @@ function getLogPath(date_obj) {
   const folder = nodejs_path.join(path_to_alldata, patient_ID, date, task_name);
   return nodejs_path.join(folder, filename);
 }
-
 
 function dateTimeString(date_obj) {
   return [dateString(date_obj), timeString(date_obj)].join('_');
@@ -289,6 +318,7 @@ function begin() {
   jsPsych.init({
     timeline: [
       new_experiment_screen,
+      adjust_zoom,
       resting_pulse_encode,
       enter_patient_info,
       instructions,
