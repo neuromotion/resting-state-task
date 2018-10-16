@@ -114,7 +114,7 @@ const instructions = {
 const resting_task = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
-  'stimulus': '<div id="fixation-dot">hi</div>' + photodiode_box(true),
+  'stimulus': '<div id="fixation-dot"> </div>' + photodiode_box(true),
   'response-ends-trial': false,
   'trial_duration': minutes_to_millis(task_minutes),
   'on_load': function() {
