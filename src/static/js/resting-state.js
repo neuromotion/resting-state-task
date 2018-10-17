@@ -52,14 +52,15 @@ const adjust_zoom = {
     '<div id="stimulus-container">',
     '<div id="empty-container">',
     '<div>',
-    '<h1>Zoom in to enlarge screen</h1>',
-    '<h3>Make sure that the number 0 remains completely visible.</h3>',
-    '<hr>',
-    '<div style="display:flex; flex-direction:column; justify-content:center;">',
-    '<span>To zoom in, press "' + zoomin_shortcut + '".</span>',
-    '<span>To zoom out, press "' + zoomout_shortcut + '".</span>',
-    '<span>Press the Space key to continue.</span>',
-    '</div>',
+      '<h1>Zoom in to enlarge screen</h1>',
+      '<h3>Make sure that the number 0 remains completely visible.</h3>',
+      '<hr>',
+      '<div style="display:flex; flex-direction:column; justify-content:center;">',
+        '<span>To zoom in, press "' + zoomin_shortcut + '".</span>',
+        '<span>To zoom out, press "' + zoomout_shortcut + '".</span>',
+      '</div>',
+      '<h3>Hold the event marker in front of the camera.</h3>',
+      '<h3>Press the Space key to continue.</h3>',
     '</div>',
     '</div>',
     '</div>',
@@ -105,7 +106,7 @@ const instructions = {
       '</h3>' +
       '<h3 class="instructions-text">Try to fixate on the dot on the screen.</h3>' +
       '<h3 class="instructions-text">Try to relax.</h3>' +
-      '<h3 class="instructions-text">Press the Space key to begin</h3>'
+      '<h3 class="instructions-text">Press the Space key to begin.</h3>'
   ],
   'key_forward': ' ',
   'on_load': () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'none')
