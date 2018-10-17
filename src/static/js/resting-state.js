@@ -103,8 +103,8 @@ const instructions = {
     '<h3 class="instructions-text">' +
       'Please sit quietly for the next ' + minutes_to_string(task_minutes) + '.' +
       '</h3>' +
-      '<h3 class="instructions-text">Try to fixate on the dot on the screen</h3>' +
-      '<h3 class="instructions-text">Keep your eyes open and try not to move around too much</h3>' +
+      '<h3 class="instructions-text">Try to fixate on the dot on the screen.</h3>' +
+      '<h3 class="instructions-text">Try to relax.</h3>' +
       '<h3 class="instructions-text">Press the Space key to begin</h3>'
   ],
   'key_forward': ' ',
