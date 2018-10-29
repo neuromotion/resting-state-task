@@ -128,12 +128,12 @@ const resting_task = {
   'trial_duration': minutes_to_millis(task_minutes),
   'on_load': function() {
     sendUsbEvent(event_codes.start_rest);
-    appendToListInFile(newMetadata('start'), getLogPath(time_opened));
+    appendToListInFile(makeTaskStartLog(), getLogPath(time_opened));
   },
 
   'on_finish': function(data) {
     sendUsbEvent(event_codes.end_rest);
-    appendToListInFile(newMetadata('end'), getLogPath(time_opened));
+    appendToListInFile(makeTaskEndLog(), getLogPath(time_opened));
   }
 }
 
@@ -146,14 +146,24 @@ const finish_up = {
 
 /************ Task-specific Utilites *************/
 
-function newMetadata(start_or_end) {
-  // start_or_end should be either the string 'start' or 'end'.
+function makeTaskStartLog() {
   return {
     'task': task_name,
-    'start_end': start_or_end,
+    'start_end': 'start',
     'timestamp': Date.now(),
     'patient_ID': patient_ID,
-    'metadata': []
+    'usb_event_marker_codes': event_codes,
+    'event_marker_present': (event_marker_port !== null),
+    'planned_duration_milliseconds': minutes_to_millis(task_minutes),
+  };
+}
+
+function makeTaskEndLog() {
+  return {
+    'task': task_name,
+    'start_end': 'end',
+    'timestamp': Date.now(),
+    'patient_ID': patient_ID,
   };
 }
 
