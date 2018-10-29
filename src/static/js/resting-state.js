@@ -45,6 +45,14 @@ var new_experiment_screen = {
   on_load: () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'default')
 }
 
+function eventMarkerMessage() {
+  if (event_marker_port === null) {
+    return '<span style="color: red;">Note: no USB event marker found.</span>';
+  } else {
+    return '<span style="color: green;">Hold the USB event marker in front of the camera.</span>';
+  }
+}
+
 const adjust_zoom = {
   'type': 'html-keyboard-response',
   'choices': [' '],
@@ -59,7 +67,7 @@ const adjust_zoom = {
         '<span>To zoom in, press "' + zoomin_shortcut + '".</span>',
         '<span>To zoom out, press "' + zoomout_shortcut + '".</span>',
       '</div>',
-      '<h3>Hold the event marker in front of the camera.</h3>',
+      '<h3>' + eventMarkerMessage() + '</h3>',
       '<h3>Press the Space key to continue.</h3>',
     '</div>',
     '</div>',
