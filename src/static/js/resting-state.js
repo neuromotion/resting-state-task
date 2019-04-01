@@ -27,10 +27,6 @@ const time_opened = new Date();
 let patient_ID = 'TEST_ID'
 
 
-// Attempt to open the USB Event Marker serial port now.
-const event_marker_port = openEventMarkerPort();
-
-
 const fullscreen_shortcut = (process.platform === 'darwin') ? 'Command Control F' : 'Fn F11' //else, linux
 const zoomin_shortcut = (process.platform === 'darwin') ? 'Command =' : 'Control Shift =' //else, linux
 const zoomout_shortcut = (process.platform === 'darwin') ? 'Command -' : 'Control -' //else, linux
@@ -43,14 +39,6 @@ var new_experiment_screen = {
   choices: ['Continue'],
   prompt: '<h3 style="color:white;">Press "' + fullscreen_shortcut + '" to toggle Fullscreen.</h3>',
   on_load: () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'default')
-}
-
-function eventMarkerMessage() {
-  if (event_marker_port === null) {
-    return '<span style="color: red;">Note: no USB event marker found.</span>';
-  } else {
-    return '<span style="color: green;">Hold the USB event marker in front of the camera.</span>';
-  }
 }
 
 const adjust_zoom = {
@@ -67,7 +55,7 @@ const adjust_zoom = {
         '<span>To zoom in, press "' + zoomin_shortcut + '".</span>',
         '<span>To zoom out, press "' + zoomout_shortcut + '".</span>',
       '</div>',
-      '<h3>' + eventMarkerMessage() + '</h3>',
+      "<h3 id='usb-alert'></h3>",
       '<h3>Press the Space key to continue.</h3>',
     '</div>',
     '</div>',
@@ -75,7 +63,7 @@ const adjust_zoom = {
     '<div>0</div></div>',
     photodiode_box(false)
   ].join(''),
-  on_load: () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'default')
+  on_load: () => (eventMarkerMessage().then(s => document.getElementById('usb-alert').innerHTML = s ))
 }
 
 
@@ -90,7 +78,7 @@ const resting_pulse_encode = {
         // Mark the start of the task by flashing the photodiode spot and sending an event code.
         const code = event_codes.open_resting_task;
         PD_spot_encode(code);
-        sendUsbEvent(code);
+        sendToPort(code);
       },
       400)
   }
@@ -127,12 +115,12 @@ const resting_task = {
   'response-ends-trial': false,
   'trial_duration': minutes_to_millis(task_minutes),
   'on_load': function() {
-    sendUsbEvent(event_codes.start_rest);
+    sendToPort(event_codes.start_rest);
     appendToListInFile(makeTaskStartLog(), getLogPath(time_opened));
   },
 
   'on_finish': function(data) {
-    sendUsbEvent(event_codes.end_rest);
+    sendToPort(event_codes.end_rest);
     appendToListInFile(makeTaskEndLog(), getLogPath(time_opened));
   }
 }
@@ -153,7 +141,6 @@ function makeTaskStartLog() {
     'timestamp': Date.now(),
     'patient_ID': patient_ID,
     'usb_event_marker_codes': event_codes,
-    'event_marker_present': (event_marker_port !== null),
     'planned_duration_milliseconds': minutes_to_millis(task_minutes),
   };
 }
@@ -292,44 +279,6 @@ function photodiode_box(is_lit) {
   return "<div class='photodiode-box' id='photodiode-box'>" +
     `<span class='photodiode-spot ${style}' id='photodiode-spot'></span>` +
     "</div>";
-}
-
-
-/************ USB Event Marker support ************/
-
-// Open a serial port to the "USB event marker".
-// Return a fs.WriteStream to the port, or null if something failed.
-function openEventMarkerPort() {
-  try {
-    // Use a python script to find which serial port the USB event marker is
-    // attached to, if any.
-    const execFileSync = require('child_process').execFileSync;
-    const out = execFileSync(
-      "/home/evan/USB-event-marker/find_event_marker_port.py",
-      [],
-      {encoding: 'utf-8'}
-    )
-    const port_path = out.trim();
-    // Open the port and return a WriteStream to it.
-    return fs.createWriteStream(port_path);
-  }
-  catch (e) {
-    // Failed - maybe the script isn't installed, or the event marker isn't plugged in.
-    console.log("Failed to open event marker port")
-    console.log(e)
-    return null
-  }
-}
-
-function sendUsbEvent(event_code) {
-  // Send the event code to the "USB event marker" arduino, over a serial port.
-  // Event code should be a number in range [1,31].
-  if (event_marker_port === null) {
-    console.log("Tried to send event, but event marker port wasn't opened")
-  }
-  else {
-    event_marker_port.write(Buffer.from([event_code]));
-  }
 }
 
 
