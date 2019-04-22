@@ -47,9 +47,11 @@
     }
   },
   "dependencies": {
+    "beepbeep": "^1.2.2",
     "electron-compile": "^6.4.3",
     "electron-forge": "^5.2.2",
     "electron-squirrel-startup": "^1.0.0",
+    "jquery": "^3.4.0",
     "serialport": "^7.1.4"
   },
   "devDependencies": {

@@ -16,8 +16,17 @@ const task_minutes = 3;
 // for other values to be re-used in other tasks.
 const event_codes = {
   'open_resting_task': 12,
-  'start_rest': 1,
-  'end_rest': 2,
+  'start_rest': 10,
+  'end_rest': 11,
+  'left': 1,
+  'right': 2,
+  'up': 3,
+  'down': 4,
+  'center': 5,
+  'blink-start': 6,
+  'blink-stop': 7,
+  'close-eyes': 8,
+  'open-eyes': 9
 }
 
 // Use the current time and date for naming the log file
@@ -108,10 +117,76 @@ const instructions = {
   'on_load': () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'none')
 }
 
+
+const start_rest  = {
+  'type': 'html-keyboard-response',
+  'choices': jsPsych.NO_KEYS,
+  'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
+  'response-ends-trial': false,
+  'trial_duration': minutes_to_millis(task_minutes),
+  'on_load': function() {
+    sendToPort(event_codes.start_rest);
+    appendToListInFile(makeTaskStartLog(), getLogPath(time_opened));
+  }
+}
+
+const look_left  = {
+  'type': 'html-keyboard-response',
+  'choices': jsPsych.NO_KEYS,
+  'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
+  'response-ends-trial': false,
+  'repetition': 3,
+  'on_load': () => {
+      sendToPort(event_codes.left);
+      moveThree('left');
+    }
+}
+
+const look_right  = {
+  'type': 'html-keyboard-response',
+  'choices': jsPsych.NO_KEYS,
+  'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
+  'response-ends-trial': false,
+  'on_load': () => {
+      sendToPort(event_codes.right);
+      moveThree('right');
+    }
+}
+
+const look_up  = {
+  'type': 'html-keyboard-response',
+  'choices': jsPsych.NO_KEYS,
+  'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
+  'response-ends-trial': false,
+  'on_load': () => {
+      sendToPort(event_codes.up);
+      moveThree('top');
+    }
+}
+
+const look_down  = {
+  'type': 'html-keyboard-response',
+  'choices': jsPsych.NO_KEYS,
+  'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
+  'response-ends-trial': false,
+  'on_load': () => {
+      sendToPort(event_codes.down);
+      moveThree('bottom');
+    }
+}
+
+const finish_rest = {
+
+  'on_finish': function(data) {
+    sendToPort(event_codes.end_rest);
+    appendToListInFile(makeTaskEndLog(), getLogPath(time_opened));
+  }
+}
+
 const resting_task = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
-  'stimulus': '<div id="fixation-dot"> </div>' + photodiode_box(true),
+  'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
   'response-ends-trial': false,
   'trial_duration': minutes_to_millis(task_minutes),
   'on_load': function() {
@@ -285,12 +360,13 @@ function photodiode_box(is_lit) {
 function begin() {
   jsPsych.init({
     timeline: [
-      new_experiment_screen,
-      adjust_zoom,
-      resting_pulse_encode,
-      enter_patient_info,
-      instructions,
-      resting_task,
+      // new_experiment_screen,
+      // adjust_zoom,
+      // resting_pulse_encode,
+      // enter_patient_info,
+      // instructions,
+      look_left,
+      // resting_task,
       finish_up
     ]
   })

@@ -1,11 +1,13 @@
 const SerialPort = require('serialport');
 
-const manufacturer = 'Teensyduino';
+const vendorId = '16c0';
+const productId = '0483';
 
 const isPort = async () => {
   const portList = await SerialPort.list()
   const device = portList.filter((device) => {
-    return device.manufacturer === manufacturer;
+    return ((device.vendorId === vendorId.toUpperCase() ||
+            device.vendorId === vendorId)  && device.productId === productId);
   })
   if (device.length === 1) {
     return true
@@ -18,16 +20,16 @@ const isPort = async () => {
 const getPort = async () => {
   const portList = await SerialPort.list()
   const device = portList.filter((device) => {
-    return device.manufacturer === manufacturer;
+    return ((device.vendorId === vendorId.toUpperCase() ||
+            device.vendorId === vendorId)  && device.productId === productId);
   })
   const path = device[0].comName;
   const port = new SerialPort(path)
   return port
 }
 
-const sendToPort = async (event_code) => {
-  const port = await getPort();
-  port.write(Buffer.from([event_code]))
+const sendToPort = async (port, event_code) => {
+  port.then(p => p.write(Buffer.from([event_code])))
 }
 
 const eventMarkerMessage = async () => {

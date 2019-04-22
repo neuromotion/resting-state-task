@@ -7,10 +7,17 @@
 
 #fixation-dot {
   border-radius: 50%;
-  width: 10px;
-  height: 10px;
+  width: 20px;
+  height: 20px;
   background-color: white;
-  margin: auto;
+}
+
+#dot-container {
+  width: 500px;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #stimulus-container {
@@ -66,6 +73,43 @@
   width: 500px;
 }
 
-::-webkit-scrollbar { 
-  display: none; 
+::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* Actions */
+/* Move left  */
+
+.move-center {
+  transform: translate()
+}
+.move-left {
+  /* transition: all 500ms ease-in-out; */
+  justify-content: flex-start !important;
+}
+.move-right {
+  /* transition: all 500ms ease-in-out; */
+  justify-content: flex-end !important;
+}
+.move-top {
+  /* transition: all 500ms ease-in-out; */
+  align-items: flex-start !important;
+  justify-content: center !important;
+}
+.move-bottom {
+  /* transition: all 500ms ease-in-out; */
+  align-items: flex-end !important;
+  justify-content: center !important;
+}
+.move-center {
+  /* transition: all 500ms ease-in-out; */
+  align-items: center !important;
+  justify-content: center !important;
+}
+.blink {
+  background-color: transparent !important;
+}
+.blink::after {
+  content: "Blink";
 }
