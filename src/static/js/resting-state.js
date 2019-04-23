@@ -123,12 +123,11 @@ const start_rest  = {
   'choices': jsPsych.NO_KEYS,
   'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
   'response-ends-trial': false,
-  'trial_duration': minutes_to_millis(task_minutes),
+  'trial_duration': 92000,
   'on_load': function() {
     const code = event_codes.start_rest;
     sendToPort(code);
     PD_spot_encode(code)
-    appendToListInFile(makeTaskStartLog(), getLogPath(time_opened));
   }
 }
 
@@ -138,6 +137,7 @@ const look_left  = {
   'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
   'trial_duration': 15000,
   'on_load': () => {
+      appendToListInFile(makeTaskStartLog(), getLogPath(time_opened));
       const code = event_codes.left;
       moveThree('left', code);
     }
@@ -402,6 +402,7 @@ function begin() {
       blink_task,
       close_instructions,
       close_task,
+      start_rest,
       finish_up
     ]
   })
