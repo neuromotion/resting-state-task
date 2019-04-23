@@ -25,9 +25,55 @@ const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const moveThree = async(position) => {
-  await sleep(2000)
+const moveThree = async(position, code) => {
+  const center = event_codes.center
+  await sleep(5000)
   moveDot(position)
+  PD_spot_encode(code)
+  sendToPort(code)
   await sleep(2000)
   moveDot('center')
+  PD_spot_encode(center)
+  sendToPort(center)
+  await sleep(2000)
+  moveDot(position)
+  PD_spot_encode(code)
+  sendToPort(code)
+  await sleep(2000)
+  moveDot('center')
+  PD_spot_encode(center)
+  sendToPort(center)
+  await sleep(2000)
+  moveDot(position)
+  PD_spot_encode(code)
+  sendToPort(code)
+  await sleep(2000)
+  moveDot('center')
+  PD_spot_encode(center)
+  sendToPort(center)
+}
+
+
+const blinkTask = async() => {
+  const start = event_codes.blink_start;
+  PD_spot_encode(start)
+  sendToPort(start)
+  beep()
+  await sleep(10000)
+  const finish = event_codes.blink_end;
+  PD_spot_encode(finish)
+  sendToPort(finish)
+  beep()
+}
+
+const closeEyesTask = async() => {
+  const close = event_codes.close_eyes;
+  PD_spot_encode(close)
+  sendToPort(close)
+  beep()
+  await sleep(10000)
+  const finish = event_codes.open_eyes;
+  PD_spot_encode(open)
+  sendToPort(open)
+  beep()
 }

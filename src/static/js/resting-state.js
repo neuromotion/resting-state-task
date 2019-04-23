@@ -23,10 +23,10 @@ const event_codes = {
   'up': 3,
   'down': 4,
   'center': 5,
-  'blink-start': 6,
-  'blink-stop': 7,
-  'close-eyes': 8,
-  'open-eyes': 9
+  'blink_start': 6,
+  'blink_stop': 7,
+  'close_eyes': 8,
+  'open_eyes': 9
 }
 
 // Use the current time and date for naming the log file
@@ -125,7 +125,9 @@ const start_rest  = {
   'response-ends-trial': false,
   'trial_duration': minutes_to_millis(task_minutes),
   'on_load': function() {
-    sendToPort(event_codes.start_rest);
+    const code = event_codes.start_rest;
+    sendToPort(code);
+    PD_spot_encode(code)
     appendToListInFile(makeTaskStartLog(), getLogPath(time_opened));
   }
 }
@@ -134,11 +136,10 @@ const look_left  = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
   'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
-  'response-ends-trial': false,
-  'repetition': 3,
+  'trial_duration': 15000,
   'on_load': () => {
-      sendToPort(event_codes.left);
-      moveThree('left');
+      const code = event_codes.left;
+      moveThree('left', code);
     }
 }
 
@@ -146,10 +147,10 @@ const look_right  = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
   'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
-  'response-ends-trial': false,
+  'trial_duration': 15000,
   'on_load': () => {
-      sendToPort(event_codes.right);
-      moveThree('right');
+    const code = event_codes.right;
+    moveThree('right', code);
     }
 }
 
@@ -157,10 +158,10 @@ const look_up  = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
   'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
-  'response-ends-trial': false,
+  'trial_duration': 15000,
   'on_load': () => {
-      sendToPort(event_codes.up);
-      moveThree('top');
+    const code = event_codes.up;
+    moveThree('top', code);
     }
 }
 
@@ -168,19 +169,47 @@ const look_down  = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
   'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
-  'response-ends-trial': false,
+  'trial_duration': 15000,
   'on_load': () => {
-      sendToPort(event_codes.down);
-      moveThree('bottom');
+    const code = event_codes.down;
+    moveThree('bottom', code);
     }
 }
 
-const finish_rest = {
+const blink_instructions = {
+  'type': 'instructions',
+  'pages': [
+    '<h3 class="instructions-text">For this next section, start blinking when you hear a "beep", and stop when you hear another "beep".</h3>' +
+    '<h3 class="instructions-text">Press the Space key when you are ready.</h3>'
+  ],
+  'key_forward': ' ',
+  'on_load': () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'none')
+}
 
-  'on_finish': function(data) {
-    sendToPort(event_codes.end_rest);
-    appendToListInFile(makeTaskEndLog(), getLogPath(time_opened));
-  }
+const blink_task = {
+  'type': 'html-keyboard-response',
+  'choices': jsPsych.NO_KEYS,
+  'stimulus': '<div id="dot-container"><h3>Blink</h3></div>' + photodiode_box(true),
+  'trial_duration': 10000,
+  'on_load': () => (blinkTask())
+}
+
+const close_instructions = {
+  'type': 'instructions',
+  'pages': [
+    '<h3 class="instructions-text">For this next section, close your eyes when you hear a "beep", and open when you hear a "beep" again.</h3>' +
+    '<h3 class="instructions-text">Press the Space key when you are ready.</h3>'
+  ],
+  'key_forward': ' ',
+  'on_load': () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'none')
+}
+
+const close_task = {
+  'type': 'html-keyboard-response',
+  'choices': jsPsych.NO_KEYS,
+  'stimulus': '<div id="dot-container"><h3>Close your eyes.</h3></div>' + photodiode_box(true),
+  'trial_duration': 10000,
+  'on_load': () => (closeEyesTask())
 }
 
 const resting_task = {
@@ -360,13 +389,19 @@ function photodiode_box(is_lit) {
 function begin() {
   jsPsych.init({
     timeline: [
-      // new_experiment_screen,
-      // adjust_zoom,
-      // resting_pulse_encode,
-      // enter_patient_info,
-      // instructions,
+      new_experiment_screen,
+      adjust_zoom,
+      resting_pulse_encode,
+      enter_patient_info,
+      instructions,
+      look_right,
       look_left,
-      // resting_task,
+      look_up,
+      look_down,
+      blink_instructions,
+      blink_task,
+      close_instructions,
+      close_task,
       finish_up
     ]
   })

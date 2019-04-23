@@ -13,8 +13,8 @@
 }
 
 #dot-container {
-  width: 500px;
-  height: 500px;
+  width: 700px;
+  height: 700px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,10 +106,4 @@
   /* transition: all 500ms ease-in-out; */
   align-items: center !important;
   justify-content: center !important;
-}
-.blink {
-  background-color: transparent !important;
-}
-.blink::after {
-  content: "Blink";
 }
