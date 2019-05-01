@@ -69,7 +69,7 @@ const adjust_zoom = {
     '</div>',
     '</div>',
     '</div>',
-    '<div>0</div></div>',
+    '</div>',
     photodiode_box(false)
   ].join(''),
   on_load: () => (eventMarkerMessage().then(s => document.getElementById('usb-alert').innerHTML = s ))
@@ -109,7 +109,7 @@ const instructions = {
     '<h3 class="instructions-text">' +
       'Please sit quietly for the next ' + minutes_to_string(task_minutes) + '.' +
       '</h3>' +
-      '<h3 class="instructions-text">Try to fixate on the dot on the screen.</h3>' +
+      '<h3 class="instructions-text">Try to fixate on and follow the dot on the screen as it moves.</h3>' +
       '<h3 class="instructions-text">Try to relax.</h3>' +
       '<h3 class="instructions-text">Press the Space key to begin.</h3>'
   ],
@@ -123,7 +123,7 @@ const start_rest  = {
   'choices': jsPsych.NO_KEYS,
   'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
   'response-ends-trial': false,
-  'trial_duration': 92000,
+  'trial_duration': 86000,
   'on_load': function() {
     const code = event_codes.start_rest;
     sendToPort(code);
@@ -189,9 +189,9 @@ const blink_instructions = {
 const blink_task = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
-  'stimulus': '<div id="dot-container"><h3>Blink</h3></div>' + photodiode_box(true),
-  'trial_duration': 10000,
-  'on_load': () => (blinkTask())
+  'stimulus': '<div id="dot-container"><h3>Blink.</h3></div>' + photodiode_box(true),
+  'trial_duration': 13000,
+  'on_load': () =>  (blinkTask())
 }
 
 const close_instructions = {
@@ -208,8 +208,22 @@ const close_task = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
   'stimulus': '<div id="dot-container"><h3>Close your eyes.</h3></div>' + photodiode_box(true),
-  'trial_duration': 10000,
+  'trial_duration': 13000,
   'on_load': () => (closeEyesTask())
+}
+
+const instructions_final = {
+  'type': 'instructions',
+  'pages': [
+    '<h3 class="instructions-text">' +
+      'Please sit quietly for the next 1.5 minute.' +
+      '</h3>' +
+      '<h3 class="instructions-text">For the remaining minute and a half, fixate on the dot in the middle of the screen and relax.</h3>' +
+      '<h3 class="instructions-text">Try to relax.</h3>' +
+      '<h3 class="instructions-text">Press the Space key to begin.</h3>'
+  ],
+  'key_forward': ' ',
+  'on_load': () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'none')
 }
 
 const resting_task = {
@@ -402,6 +416,7 @@ function begin() {
       blink_task,
       close_instructions,
       close_task,
+      instructions_final,
       start_rest,
       finish_up
     ]
