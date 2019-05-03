@@ -9,7 +9,6 @@ const path_to_alldata = nodejs_path.join(app.getPath('desktop'), 'OCD-Project-Da
 
 // How long to gather resting-state data for:
 const task_minutes = 3;
-
 // Values to send to the 'USB event marker' arduino when an event happens.
 // Make sure the 'open_resting_task' value doesn't conflict with any value sent
 // by any other task, since we use it to uniquely identify this task. It's ok
@@ -87,7 +86,7 @@ const resting_pulse_encode = {
         // Mark the start of the task by flashing the photodiode spot and sending an event code.
         const code = event_codes.open_resting_task;
         PD_spot_encode(code);
-        sendToPort(code);
+        sendToPort(port, code);
       },
       400)
   }
@@ -126,7 +125,7 @@ const start_rest  = {
   'trial_duration': 86000,
   'on_load': function() {
     const code = event_codes.start_rest;
-    sendToPort(code);
+    sendToPort(port, code);
     PD_spot_encode(code)
   }
 }
@@ -233,12 +232,12 @@ const resting_task = {
   'response-ends-trial': false,
   'trial_duration': minutes_to_millis(task_minutes),
   'on_load': function() {
-    sendToPort(event_codes.start_rest);
+    sendToPort(port, event_codes.start_rest);
     appendToListInFile(makeTaskStartLog(), getLogPath(time_opened));
   },
 
   'on_finish': function(data) {
-    sendToPort(event_codes.end_rest);
+    sendToPort(port, event_codes.end_rest);
     appendToListInFile(makeTaskEndLog(), getLogPath(time_opened));
   }
 }

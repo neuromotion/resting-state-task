@@ -30,27 +30,27 @@ const moveThree = async(position, code) => {
   await sleep(5000)
   moveDot(position)
   PD_spot_encode(code)
-  sendToPort(code)
+  sendToPort(port, code)
   await sleep(2000)
   moveDot('center')
   PD_spot_encode(center)
-  sendToPort(center)
+  sendToPort(port, center)
   await sleep(2000)
   moveDot(position)
   PD_spot_encode(code)
-  sendToPort(code)
+  sendToPort(port, code)
   await sleep(2000)
   moveDot('center')
   PD_spot_encode(center)
-  sendToPort(center)
+  sendToPort(port, center)
   await sleep(2000)
   moveDot(position)
   PD_spot_encode(code)
-  sendToPort(code)
+  sendToPort(port, code)
   await sleep(2000)
   moveDot('center')
   PD_spot_encode(center)
-  sendToPort(center)
+  sendToPort(port, center)
 }
 
 
@@ -58,12 +58,12 @@ const blinkTask = async() => {
   await sleep(1000)
   const start = event_codes.blink_start;
   PD_spot_encode(start)
-  sendToPort(start)
+  sendToPort(port, start)
   beep()
   await sleep(10000)
   const finish = event_codes.blink_end;
   PD_spot_encode(finish)
-  sendToPort(finish)
+  sendToPort(port, finish)
   beep()
   await sleep(1000)
 }
@@ -72,12 +72,12 @@ const closeEyesTask = async() => {
   await sleep(1000)
   const close = event_codes.close_eyes;
   PD_spot_encode(close)
-  sendToPort(close)
+  sendToPort(port, close)
   beep()
   await sleep(10000)
   const finish = event_codes.open_eyes;
   PD_spot_encode(open)
-  sendToPort(open)
+  sendToPort(port, open)
   beep()
   await sleep(1000)
 }
