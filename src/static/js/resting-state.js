@@ -145,10 +145,11 @@ const look_left  = {
 const look_right  = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
-  'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
+  'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(false),
   'trial_duration': 15000,
   'on_load': () => {
     const code = event_codes.right;
+    PD_spot_encode(code);
     moveThree('right', code);
     }
 }
@@ -388,6 +389,9 @@ function PD_spot_encode(num_code) {
   }
 
   const spot = document.getElementById('photodiode-spot')
+	if (num_code < 12) {
+		num_code = 1
+		}
   repeat_pulse_for(spot, 40, num_code)
 }
 
