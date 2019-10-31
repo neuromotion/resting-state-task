@@ -9,7 +9,8 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint src --color"
+    "lint": "eslint src --color",
+    "commit": "git-cz"
   },
   "keywords": [],
   "author": "derekhong",
@@ -58,6 +59,7 @@
     "babel-plugin-transform-async-to-generator": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
+    "commitizen": "^4.0.3",
     "electron-prebuilt-compile": "3.0.0",
     "eslint": "^3",
     "eslint-config-airbnb": "^15",

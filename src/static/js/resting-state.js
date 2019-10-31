@@ -189,7 +189,7 @@ const blink_instructions = {
 const blink_task = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
-  'stimulus': '<div id="dot-container"><h3>Blink.</h3></div>' + photodiode_box(true),
+  'stimulus': '<div id="dot-container"><h3>Blink.</h3></div>' + photodiode_box(false),
   'trial_duration': 13000,
   'on_load': () =>  (blinkTask())
 }
@@ -202,12 +202,12 @@ const close_instructions = {
   ],
   'key_forward': ' ',
   'on_load': () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'none')
-}
+} 
 
 const close_task = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
-  'stimulus': '<div id="dot-container"><h3>Close your eyes.</h3></div>' + photodiode_box(true),
+  'stimulus': '<div id="dot-container"><h3>Close your eyes.</h3></div>' + photodiode_box(false),
   'trial_duration': 13000,
   'on_load': () => (closeEyesTask())
 }
@@ -239,6 +239,7 @@ const resting_task = {
 
   'on_finish': function(data) {
     sendToPort(port, event_codes.end_rest);
+    PD_spot_encode(event_codes.end_rest);
     appendToListInFile(makeTaskEndLog(), getLogPath(time_opened));
   }
 }
@@ -246,7 +247,10 @@ const resting_task = {
 const finish_up = {
   'type': 'html-keyboard-response',
   'choices': jsPsych.NO_KEYS,
-  'stimulus': 'The resting state task is complete.'
+  'stimulus': 'The resting state task is complete.' + photodiode_box(true), 
+  'on_load': () => {
+    PD_spot_encode(event_codes.end_rest);
+  }
 }
 
 
