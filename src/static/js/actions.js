@@ -27,7 +27,6 @@ const sleep = (ms) => {
 
 const moveThree = async(position, code) => {
   const center = event_codes.center
-  PD_spot_encode(center)
   await sleep(5000)
   moveDot(position)
   PD_spot_encode(code)
@@ -51,7 +50,7 @@ const moveThree = async(position, code) => {
   await sleep(2000)
   moveDot('center')
   PD_spot_encode(center)
-  sendToPort(port, center)
+  sendToPort(port,center)
 }
 
 

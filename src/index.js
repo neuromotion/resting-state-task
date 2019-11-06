@@ -9,7 +9,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 
-let isFullScreen = false
+let isFullScreen = true
 
 const template = [
   {
@@ -75,6 +75,8 @@ const createWindow = () => {
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
+
+  mainWindow.setFullScreen(isFullScreen);
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {

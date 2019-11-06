@@ -45,7 +45,6 @@ var new_experiment_screen = {
   type: 'html-button-response',
   stimulus: '<span id="task-name"><h1>Resting State Task</h1></span>' + photodiode_box(false),
   choices: ['Continue'],
-  prompt: '<h3 style="color:white;">Press "' + fullscreen_shortcut + '" to toggle Fullscreen.</h3>',
   on_load: () => (document.getElementsByClassName('jspsych-content-wrapper')[0].style.cursor = 'default')
 }
 
@@ -56,13 +55,6 @@ const adjust_zoom = {
     '<div id="stimulus-container">',
     '<div id="empty-container">',
     '<div>',
-      '<h1>Zoom in to enlarge screen</h1>',
-      '<h3>Make sure that the number 0 remains completely visible.</h3>',
-      '<hr>',
-      '<div style="display:flex; flex-direction:column; justify-content:center;">',
-        '<span>To zoom in, press "' + zoomin_shortcut + '".</span>',
-        '<span>To zoom out, press "' + zoomout_shortcut + '".</span>',
-      '</div>',
       "<h3 id='usb-alert'></h3>",
       '<h3>Press the Space key to continue.</h3>',
     '</div>',
@@ -99,6 +91,8 @@ let enter_patient_info = {
   on_finish: function(data) {
     const answer = JSON.parse(data.responses)['Q0']
     patient_ID = (answer === '') ? patient_ID : answer
+    arr.push(makeTaskStartLog())
+    console.log(arr)
   }
 }
 
@@ -126,7 +120,7 @@ const start_rest  = {
   'on_load': function() {
     const code = event_codes.start_rest;
     sendToPort(port, code);
-    PD_spot_encode(code)
+    PD_spot_encode(code);
   }
 }
 
@@ -136,7 +130,6 @@ const look_left  = {
   'stimulus': '<div id="dot-container"><div id="fixation-dot"> </div></div>' + photodiode_box(true),
   'trial_duration': 15000,
   'on_load': () => {
-      appendToListInFile(makeTaskStartLog(), getLogPath(time_opened));
       const code = event_codes.left;
       moveThree('left', code);
     }
@@ -149,7 +142,9 @@ const look_right  = {
   'trial_duration': 15000,
   'on_load': () => {
     const code = event_codes.right;
-    PD_spot_encode(code);
+    const center = event_codes.center;
+    sendToPort(port, center);
+    PD_spot_encode(center);
     moveThree('right', code);
     }
 }
@@ -249,12 +244,18 @@ const finish_up = {
   'choices': jsPsych.NO_KEYS,
   'stimulus': 'The resting state task is complete.' + photodiode_box(true), 
   'on_load': () => {
+    sendToPort(port, event_codes.end_rest);
     PD_spot_encode(event_codes.end_rest);
+    appendToListInFile(arr, getLogPath(time_opened));
+
   }
 }
 
 
 /************ Task-specific Utilites *************/
+
+
+var arr = [];
 
 function makeTaskStartLog() {
   return {
@@ -391,12 +392,19 @@ function PD_spot_encode(num_code) {
       })
     }
   }
+  var currObj = {
+    'event_code': num_code,
+    'timestamp': Date.now(),    
+  };
+  arr.push(currObj);
+  console.log(arr)
 
   const spot = document.getElementById('photodiode-spot')
 	if (num_code < 12) {
 		num_code = 1
 		}
   repeat_pulse_for(spot, 40, num_code)
+
 }
 
 function photodiode_box(is_lit) {
